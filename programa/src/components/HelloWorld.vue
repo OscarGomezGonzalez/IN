@@ -1,58 +1,78 @@
 <template>
-  <div class="hello">
-    <h1>{{ msg }}</h1>
-    <p>
-      For a guide and recipes on how to configure / customize this project,<br>
-      check out the
-      <a href="https://cli.vuejs.org" target="_blank" rel="noopener">vue-cli documentation</a>.
-    </p>
-    <h3>Installed CLI Plugins</h3>
-    <ul>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-babel" target="_blank" rel="noopener">babel</a></li>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-eslint" target="_blank" rel="noopener">eslint</a></li>
-    </ul>
-    <h3>Essential Links</h3>
-    <ul>
-      <li><a href="https://vuejs.org" target="_blank" rel="noopener">Core Docs</a></li>
-      <li><a href="https://forum.vuejs.org" target="_blank" rel="noopener">Forum</a></li>
-      <li><a href="https://chat.vuejs.org" target="_blank" rel="noopener">Community Chat</a></li>
-      <li><a href="https://twitter.com/vuejs" target="_blank" rel="noopener">Twitter</a></li>
-      <li><a href="https://news.vuejs.org" target="_blank" rel="noopener">News</a></li>
-    </ul>
-    <h3>Ecosystem</h3>
-    <ul>
-      <li><a href="https://router.vuejs.org" target="_blank" rel="noopener">vue-router</a></li>
-      <li><a href="https://vuex.vuejs.org" target="_blank" rel="noopener">vuex</a></li>
-      <li><a href="https://github.com/vuejs/vue-devtools#vue-devtools" target="_blank" rel="noopener">vue-devtools</a></li>
-      <li><a href="https://vue-loader.vuejs.org" target="_blank" rel="noopener">vue-loader</a></li>
-      <li><a href="https://github.com/vuejs/awesome-vue" target="_blank" rel="noopener">awesome-vue</a></li>
-    </ul>
-  </div>
+    <v-container>
+        <v-row class="text-center">
+
+            <v-col cols="6">
+                <v-img
+                        src="https://www.mairenainforma.es/wp-content/uploads/2015/03/torre.jpg"
+                        class="my-3"
+                        contain
+                        height="700"
+                />
+            </v-col>
+            <v-col cols="6">
+                <v-img
+                        src="https://i.pinimg.com/236x/b6/ae/59/b6ae59abb791ee9e536b50e464982744.jpg"
+                        class="my-3"
+                        contain
+                        height="200"
+                />
+                <h1 class="display-2 font-weight-bold mb-3">
+                    Welcome to Solaire
+                </h1>
+                <v-form>
+                    <v-row>
+                        <v-col cols="10">
+                            <v-file-input label="Seleccionar datos a cargar" dense></v-file-input>
+                        </v-col>
+                        <v-col cols="2">
+                            <v-btn rounded color="primary">Cargar datos</v-btn>
+                        </v-col>
+                    </v-row>
+                </v-form>
+                <v-form>
+                    <v-text-field label="Porcentaje(%)" v-model="porcentaje">70</v-text-field>
+                    <h3 >PANEL</h3>
+                    <v-text-field label="KWatio" v-model="panelKW" value="1.3"></v-text-field>
+                    <v-text-field label="MetrosPanel" v-model="panelMeters" value="0.3">70</v-text-field>
+                </v-form>
+            </v-col>
+
+
+            <v-col class="mb-5" cols="12">
+
+
+                <v-row justify="center">
+
+                </v-row>
+            </v-col>
+
+            <v-col class="mb-5" cols="12">
+
+
+                <v-row justify="center">
+
+                </v-row>
+            </v-col>
+
+            <v-col class="mb-5" cols="12">
+                <v-row justify="center">
+
+                </v-row>
+            </v-col>
+        </v-row>
+    </v-container>
 </template>
 
 <script>
-export default {
-  name: 'HelloWorld',
-  props: {
-    msg: String
-  }
-}
-</script>
+    export default {
+        name: 'HelloWorld',
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-h3 {
-  margin: 40px 0 0;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
-}
-</style>
+        data: () => ({
+            panelMeters: 0.5,
+            porcentaje: 70,
+            panelKW: 1.3,
+
+        }),
+    }
+</script>
