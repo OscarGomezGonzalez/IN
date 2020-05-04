@@ -20,19 +20,39 @@
                 <h1 class="display-2 font-weight-bold mb-3">
                     Welcome to Solaire
                 </h1>
-                <v-form>
+                <v-form v-on:submit.prevent="importTxt">
                     <v-row>
                         <v-col cols="10">
-                            <v-file-input label="Seleccionar datos a cargar" dense></v-file-input>
+                            <!--accept=".csv"-->
+                            <v-file-input multiple v-model="chosenFiles" type="file" label="Seleccionar datos a cargar"
+                                          dense></v-file-input>
                         </v-col>
                         <v-col cols="2">
-                            <v-btn rounded color="primary">Cargar datos</v-btn>
+                            <v-btn type="submit" rounded color="primary">Cargar datos</v-btn>
                         </v-col>
                     </v-row>
                 </v-form>
+                <v-progress-circular v-if="fileLoading" indeterminate
+                                     color="blue"
+                ></v-progress-circular>
+                <v-alert type="error" v-if="error!=null">{{error}}</v-alert>
+                <div v-if="chosenFiles.length > 0">
+                    <p>{{filesData.length+1}} dataset<span v-if="filesData.length>0">s</span> loaded</p>
+                    <!--
+                    <v-col cols="auto">
+                        <v-card raised>
+                            <v-card-title>File contents:</v-card-title>
+                            <v-card-text v-bind:key="fileData.data" v-for="fileData in filesData">
+                                <p v-if="fileData!=null">{{ fileData.data.length }}</p>
+                                <v-alert type="warning" v-else>Error al cargar archivo</v-alert>
+                            </v-card-text>
+                        </v-card>
+                    </v-col>
+                    -->
+                </div>
                 <v-form>
                     <v-text-field label="Porcentaje(%)" v-model="porcentaje">70</v-text-field>
-                    <h3 >PANEL</h3>
+                    <h3>PANEL</h3>
                     <v-text-field label="KWatio" v-model="panelKW" value="1.3"></v-text-field>
                     <v-text-field label="MetrosPanel" v-model="panelMeters" value="0.3">70</v-text-field>
                 </v-form>
@@ -63,16 +83,70 @@
         </v-row>
     </v-container>
 </template>
-
 <script>
+    import Papa from 'papaparse'
+
     export default {
         name: 'HelloWorld',
+        data: function () {
+            return {
+                panelMeters: 0.5,
+                porcentaje: 70,
+                panelKW: 1.3,
+                chosenFiles: [],
+                filesData: [],
+                error: null,
+                fileLoading: false,
+                fileProgress: 0,
+                fileSize: 0,
 
-        data: () => ({
-            panelMeters: 0.5,
-            porcentaje: 70,
-            panelKW: 1.3,
+            }
+        },
+        methods: {
 
-        }),
+            LoadedData(data) {
+                if (this.filesData.indexOf(data)) {
+                    console.log("Error");
+                }
+                this.filesData.push(data);
+                this.fileLoading = false;
+            },
+            /**
+             loadingBar(row) {
+                var progress = row.indexes[0];
+                var newPercent = Math.round(progress / this.fileSize * 100);
+                if (newPercent === this.fileProgress) return;
+                this.fileProgress = newPercent;
+            },
+             */
+            importTxt() {
+
+                if (this.chosenFiles.length == 0) {
+                    this.error = "No File Chosen"
+                } else {
+                    this.error = null;
+                }
+
+                for (var i = 0; i < this.chosenFiles.length; i++) {
+                    // Use the javascript reader object to load the contents
+                    // of the file in the v-model prop
+
+                    this.fileLoading = true;
+                    this.fileSize = this.chosenFiles[i].size;
+                    Papa.parse(this.chosenFiles[i],
+                        {
+                            complete: (results) => {
+                                this.LoadedData(results);
+                            },
+                            /**
+                             step: (row) => {
+                                this.loadingBar(row);
+                            }
+                             */
+                        });
+                }
+            }
+        }
     }
 </script>
+
