@@ -36,8 +36,8 @@
                                      color="blue"
                 ></v-progress-circular>
                 <v-alert type="error" v-if="error!=null">{{error}}</v-alert>
-                <div v-if="chosenFiles.length > 0">
-                    <p>{{filesData.length+1}} dataset<span v-if="filesData.length>0">s</span> loaded</p>
+                <div v-if="filesData.length > 0">
+                    <p>{{filesData.length}} dataset<span v-if="filesData.length>0">s</span> loaded</p>
                     <!--
                     <v-col cols="auto">
                         <v-card raised>
@@ -94,10 +94,11 @@
                 porcentaje: 70,
                 panelKW: 1.3,
                 chosenFiles: [],
-                filesData: [],
                 error: null,
                 fileLoading: false,
                 fileProgress: 0,
+                filesData: [],
+                filesHeaders: [],
                 fileSize: 0,
 
             }
@@ -109,6 +110,18 @@
                     console.log("Error");
                 }
                 this.filesData.push(data);
+                this.filesHeaders = this.filesData[0].data[0].slice(1);
+                //This will filter the first row and first column of the matrix
+                //Map will execute a function for every element of the array, and as it is a matrix we'll need to
+                //indent a map inside a map functio
+                var newArray = this.filesData.map(function (val) {
+                    //this will remove the first row
+                    return val.data.slice(1).map(function (element) {
+                        //this will remove the first column
+                        return element.slice(1);
+                    });
+                });
+                this.filesData = newArray;
                 this.fileLoading = false;
             },
             /**
