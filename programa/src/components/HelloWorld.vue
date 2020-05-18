@@ -49,6 +49,8 @@
                         </v-card>
                     </v-col>
                     -->
+                    <v-btn @click="Mean" rounded primary>Analyze</v-btn>
+                    <p v-if="average !=null"></p>
                 </div>
                 <v-form>
                     <v-text-field label="Porcentaje(%)" v-model="porcentaje">70</v-text-field>
@@ -100,26 +102,63 @@
                 filesData: [],
                 filesHeaders: [],
                 fileSize: 0,
+                average: null,
+                indice: 0,
 
             }
         },
         methods: {
+            Mean() {
+                const average = (...nums) => nums.reduce((acc, val) => acc + val, 0) / nums.length;
 
-            LoadedData(data) {
-                if (this.filesData.indexOf(data)) {
-                    console.log("Error");
+
+                //Debugging:
+                var avg = this.filesData.map(function (val) {
+                    console.log("tipo de variable");
+                    console.log(typeof(val));
+                    console.log(val)
+                    return average(...val);
+
+                });
+                console.log(avg);
+                this.average = average(...avg);
+                /**
+                 *  var sum = [];
+                 *  for (var i = 0; i < this.filesData.length; i++) {
+                 *  sum.push(this.filesData[i].data)
                 }
+                 this.average = average(...sum);
+                 **/
+            },
+            LoadedData(data) {
+
+                if (this.filesData.includes(data)) {
+                    console.log("Error");
+                    console.log(data)
+                    this.fileLoading = false;
+                    this.error = "Error al cargar datos"
+                    return;
+                }
+                console.log("Tamaño antes de incluir data "+this.filesData.length)
                 this.filesData.push(data);
-                this.filesHeaders = this.filesData[0].data[0].slice(1);
+                if(this.filesData.length < 0){
+                    this.filesHeaders = this.filesData[0].data[0].slice(1);
+                }
+                console.log("Tamaño despues de incluir data "+this.filesData.length
+                    +"\nIndice: "+ this.indice);
+                console.log(this.filesData[this.indice].data.length);
                 //This will filter the first row and first column of the matrix
                 //Map will execute a function for every element of the array, and as it is a matrix we'll need to
-                //indent a map inside a map functio
+                //indent a map inside a map function
                 var newArray = this.filesData.map(function (val) {
                     //this will remove the first row
-                    return val.data.slice(1).map(function (element) {
+                    return val.data.slice(1).sort((a,b)=> a[0].split("/")[1] - b[0].split("/")[1]);
+                    /**return val.data.slice(1).map(function (element) {
                         //this will remove the first column
-                        return element.slice(1);
+                        //return element.slice(1);
+                        return element.sort((a,b)=> b[0].split("/")[1] - a[0].split("/")[1]);
                     });
+                     **/
                 });
                 this.filesData = newArray;
                 this.fileLoading = false;
