@@ -88,6 +88,42 @@
 <script>
     import Papa from 'papaparse'
 
+    function SplitByMonth(Array) {
+        var retArray = [];
+        var k = 0;
+        var limit_end = k;
+        for (var i = 0; i < 12 && k < Array.length; i++) {
+            var compare_i = i + 1;
+            if (i < 9) {
+                compare_i = "0" + compare_i;
+            }
+            var cambio = "false";
+            var num_elements = 0;
+            for (var j = k; j < Array.length && cambio == "false"; j++) {
+                try {
+                    if (Array[j][0].split("/")[1] != compare_i) {
+                        cambio = "true";
+                        limit_end = j;
+                    }
+                    num_elements++;
+                } catch (e) {
+                    console.log(e);
+                    console.log("indice j: " + j + "  Length de array en j:" + Array[j].length);
+                    console.log(Array[j]);
+                }
+
+            }
+            if (num_elements > 0) {
+                if (cambio == "false") {
+                    limit_end = Array.length + 1;
+                }
+                retArray[i] = Array.slice(k, limit_end);
+            }
+            k = limit_end;
+        }
+        return retArray
+    }
+
     export default {
         name: 'HelloWorld',
         data: function () {
@@ -141,7 +177,7 @@
                 }
                 console.log("Tamaño antes de incluir data " + this.filesData.length)
                 this.filesData.push(data);
-                if (this.filesData.length < 0) {
+                if (this.filesData.length == 1) {
                     this.filesHeaders = this.filesData[0].data[0].slice(1);
                 }
                 console.log("Tamaño despues de incluir data " + this.filesData.length
@@ -151,8 +187,12 @@
                 //Map will execute a function for every element of the array, and as it is a matrix we'll need to
                 //indent a map inside a map function
                 var newArray = this.filesData.map(function (val) {
-                    //this will remove the first row
-                    return val.data.slice(1).sort((a, b) => a[0].split("/")[1] - b[0].split("/")[1]);
+                    //this will remove the first row and order based on date month
+                    var orderedArray = val.data.slice(1).sort((a, b) => a[0].split("/")[1] - b[0].split("/")[1]);
+                    //Splice array based in months
+                    console.log(orderedArray.length);
+                    console.log(orderedArray);
+                    return SplitByMonth(orderedArray);
                     /**return val.data.slice(1).map(function (element) {
                         //this will remove the first column
                         //return element.slice(1);
