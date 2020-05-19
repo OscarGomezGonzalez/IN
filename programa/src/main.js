@@ -7,6 +7,6 @@ Vue.config.productionTip = false
 import './assets/css/styles.scss'
 
 new Vue({
-  vuetify,
-  render: h => h(App)
+    vuetify,
+    render: h => h(App)
 }).$mount('#app')

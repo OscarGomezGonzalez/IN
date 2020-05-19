@@ -115,7 +115,7 @@
                 //Debugging:
                 var avg = this.filesData.map(function (val) {
                     console.log("tipo de variable");
-                    console.log(typeof(val));
+                    console.log(typeof (val));
                     console.log(val)
                     return average(...val);
 
@@ -139,20 +139,20 @@
                     this.error = "Error al cargar datos"
                     return;
                 }
-                console.log("Tamaño antes de incluir data "+this.filesData.length)
+                console.log("Tamaño antes de incluir data " + this.filesData.length)
                 this.filesData.push(data);
-                if(this.filesData.length < 0){
+                if (this.filesData.length < 0) {
                     this.filesHeaders = this.filesData[0].data[0].slice(1);
                 }
-                console.log("Tamaño despues de incluir data "+this.filesData.length
-                    +"\nIndice: "+ this.indice);
+                console.log("Tamaño despues de incluir data " + this.filesData.length
+                    + "\nIndice: " + this.indice);
                 console.log(this.filesData[this.indice].data.length);
                 //This will filter the first row and first column of the matrix
                 //Map will execute a function for every element of the array, and as it is a matrix we'll need to
                 //indent a map inside a map function
                 var newArray = this.filesData.map(function (val) {
                     //this will remove the first row
-                    return val.data.slice(1).sort((a,b)=> a[0].split("/")[1] - b[0].split("/")[1]);
+                    return val.data.slice(1).sort((a, b) => a[0].split("/")[1] - b[0].split("/")[1]);
                     /**return val.data.slice(1).map(function (element) {
                         //this will remove the first column
                         //return element.slice(1);
