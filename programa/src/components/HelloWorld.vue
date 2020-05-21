@@ -8,6 +8,7 @@
                         class="my-3"
                         contain
                         height="700"
+
                 />
             </v-col>
             <v-col cols="6">
@@ -18,7 +19,7 @@
                         height="200"
                 />
                 <h1 class="display-2 font-weight-bold mb-3">
-                    Welcome to Solaire
+                    Bienvenido a Solaire
                 </h1>
                 <v-form v-on:submit.prevent="importTxt">
                     <v-row>
@@ -37,7 +38,7 @@
                 ></v-progress-circular>
                 <v-alert type="error" v-if="error!=null">{{error}}</v-alert>
                 <div v-if="filesData.length > 0">
-                    <p>{{filesData.length}} dataset<span v-if="filesData.length>0">s</span> loaded</p>
+                    <p>{{filesData.length}} dataset<span v-if="filesData.length>1">s</span> loaded</p>
                     <!--
                     <v-col cols="auto">
                         <v-card raised>
@@ -49,7 +50,7 @@
                         </v-card>
                     </v-col>
                     -->
-                    <v-btn @click="Mean" rounded primary>Analyze</v-btn>
+                    <v-btn @click="Mean" rounded primary>Analizar</v-btn>
                     <p v-if="average !=null"></p>
                 </div>
                 <v-form>
