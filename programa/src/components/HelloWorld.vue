@@ -12,7 +12,7 @@
             </v-col>
             <v-col cols="6">
                 <v-img
-                        src="https://i.pinimg.com/236x/b6/ae/59/b6ae59abb791ee9e536b50e464982744.jpg"
+                        src="../assets/images/solaire.png"
                         class="my-3"
                         contain
                         height="200"

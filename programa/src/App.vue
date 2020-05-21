@@ -7,10 +7,10 @@
         >
             <div class="d-flex align-center">
                 <v-img
-                        alt="Vuetify Logo"
+                        alt="Solaire Logo"
                         class="shrink mr-2"
                         contain
-                        src="https://cdn-prod.scalefast.com/public/assets/img/resized/bandai-namco-store-eu/7963e1ccb39f44bbb6c2e490775a487e_400_KR.png"
+                        src="./assets/images/solaire.png"
                         transition="scale-transition"
                         width="40"
                 />
@@ -36,11 +36,11 @@
             <v-spacer></v-spacer>
 
             <v-btn
-                    href="https://github.com/vuetifyjs/vuetify/releases/latest"
+                    href="https://github.com/OscarGomezGonzalez/IN/tree/master/programa"
                     target="_blank"
                     text
             >
-                <span class="mr-2">Latest Release</span>
+                <span class="mr-2">GITHUB Project</span>
                 <v-icon>mdi-open-in-new</v-icon>
             </v-btn>
         </v-app-bar>
