@@ -98,12 +98,12 @@
             if (i < 9) {
                 compare_i = "0" + compare_i;
             }
-            var cambio = "false";
+            var cambio = false;
             var num_elements = 0;
-            for (var j = k; j < Array.length && cambio == "false"; j++) {
+            for (var j = k; j < Array.length && !cambio; j++) {
                 try {
                     if (Array[j][0].split("/")[1] != compare_i) {
-                        cambio = "true";
+                        cambio = true;
                         limit_end = j;
                     }
                     num_elements++;
@@ -115,7 +115,7 @@
 
             }
             if (num_elements > 0) {
-                if (cambio == "false") {
+                if (!cambio) {
                     limit_end = Array.length + 1;
                 }
                 retArray[i] = Array.slice(k, limit_end);
@@ -174,8 +174,7 @@
 
                 if (this.filesData.includes(data)) {
                     console.log("Error");
-                    console.log(data)
-                    this.fileLoading = false;
+                    console.log(data);
                     this.error = "Error al cargar datos"
                     return;
                 }
@@ -205,7 +204,7 @@
                      **/
                 });
                 this.filesData = newArray;
-                this.fileLoading = false;
+                this.indice = this.indice + 1;
             },
             /**
              loadingBar(row) {
@@ -228,11 +227,11 @@
                     // of the file in the v-model prop
 
                     this.fileLoading = true;
-                    this.fileSize = this.chosenFiles[i].size;
                     Papa.parse(this.chosenFiles[i],
                         {
                             complete: (results) => {
                                 this.LoadedData(results);
+                                this.fileLoading = false;
                             },
                             /**
                              step: (row) => {
