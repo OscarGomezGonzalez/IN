@@ -88,7 +88,9 @@
 </template>
 <script>
     import Papa from 'papaparse'
-    var { jStat } = require('jstat');
+
+    var {jStat} = require('jstat');
+
     function SplitByMonth(Array) {
         var retArray = [];
         var k = 0;
@@ -149,23 +151,26 @@
                 //const average = (...nums) => nums.reduce((acc, val) => acc + val, 0) / nums.length;
 
                 //Debugging:
-                console.log("probando map");
-                var datas = this.filesData[0].map(function(val){
-                    return val.map(function (arr){
-                        return arr.slice(1).map(function (element){
+                var datas = this.filesData[0].map(function (val) {
+                    return val.map(function (arr) {
+                        return arr.slice(1).map(function (element) {
                             return parseFloat(element);
                         });
                     });
                 });
+                datas = datas.map(function (val) {
+                    return jStat.transpose(val);
+                });
 
-                console.log(datas);
-                console.log("prueba de datas");
-                for (var i = 0; i < this.filesData.length; i++) {
-                    var medias = [];
-                    for (var j = 0; j < 12; j++) {
-                        var avg = jStat.mean(datas[i][j]);
-                        medias.push(avg);
+                var medias = [];
+                var avg = [];
+
+                for (var i = 0; i < 12; i++) {
+                    avg = [];
+                    for (var j = 0; j < datas[i].length; j++) {
+                        avg.push(jStat.mean(datas[i][j]));
                     }
+                    medias.push(avg);
                 }
                 this.dataStatistics.push(medias);
             },
