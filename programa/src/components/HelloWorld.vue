@@ -88,7 +88,7 @@
 </template>
 <script>
     import Papa from 'papaparse'
-
+    var { jStat } = require('jstat');
     function SplitByMonth(Array) {
         var retArray = [];
         var k = 0;
@@ -137,35 +137,38 @@
                 fileLoading: false,
                 fileProgress: 0,
                 filesData: [],
+                dataStatistics: [],
                 filesHeaders: [],
                 fileSize: 0,
                 average: null,
                 indice: 0,
-
             }
         },
         methods: {
             Mean() {
-                const average = (...nums) => nums.reduce((acc, val) => acc + val, 0) / nums.length;
+                //const average = (...nums) => nums.reduce((acc, val) => acc + val, 0) / nums.length;
 
 
                 //Debugging:
-                var avg = this.filesData.map(function (val) {
-                    console.log("tipo de variable");
-                    console.log(typeof (val));
-                    console.log(val)
-                    return average(...val);
-
+                console.log("probando map");
+                var datas = this.filesData[0].map(function(val){
+                    return val.map(function (arr){
+                        return arr.slice(1).map(function (element){
+                            return parseFloat(element);
+                        });
+                    });
                 });
-                console.log(avg);
-                this.average = average(...avg);
-                /**
-                 *  var sum = [];
-                 *  for (var i = 0; i < this.filesData.length; i++) {
-                 *  sum.push(this.filesData[i].data)
+
+                console.log(datas);
+                console.log("prueba de datas");
+                for (var i = 0; i < this.filesData.length; i++) {
+                    var medias = [];
+                    for (var j = 0; j < 12; j++) {
+                        var avg = jStat.mean(datas[i][j]);
+                        medias.push(avg);
+                    }
                 }
-                 this.average = average(...sum);
-                 **/
+                this.dataStatistics.push(medias);
             },
             LoadedData(data) {
 

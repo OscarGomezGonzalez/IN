@@ -27,7 +27,7 @@
                          <span v-if="$vuetify.theme.dark === true">
                              <img alt="logo" src="./assets/images/moon.png" width="40">
                          </span>
-                    <span v-else>
+                        <span v-else>
                              <img alt="logo" src="./assets/images/sun.png" width="40">
                          </span>
                 </label>
