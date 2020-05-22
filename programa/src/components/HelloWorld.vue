@@ -148,6 +148,9 @@
             Mean() {
                 //const average = (...nums) => nums.reduce((acc, val) => acc + val, 0) / nums.length;
 
+                for(let i; i < this.filesData.length; i++){
+                    numFicheros = numFicheros + 1;
+                }
 
                 //Debugging:
                 console.log("probando map");
