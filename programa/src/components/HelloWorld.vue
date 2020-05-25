@@ -51,6 +51,9 @@
                     </v-col>
                     -->
                     <v-btn @click="Mean" rounded primary>Analizar</v-btn>
+                    <div v-if="dataStatistics.length > 0">
+                        <v-btn @click="createPDF" rounded primary>PDF</v-btn>
+                    </div>
                     <p v-if="average !=null"></p>
                 </div>
                 <v-form>
@@ -244,6 +247,13 @@
                              */
                         });
                 }
+            },
+            createPDF() {
+                var fecha = new Date();
+                var pdfName = "presupuesto Solaire " + fecha.getDate() + "/" + (fecha.getMonth() + 1) + "/" + fecha.getFullYear();
+                var doc = new jsPDF();
+                doc.text(this.dataStatistics.toString(), 10, 10);
+                doc.save(pdfName + '.pdf');
             }
         }
     }
