@@ -87,10 +87,31 @@
                 </v-row>
             </v-col>
         </v-row>
+        <v-row class="text-center">
+            <div ref="content">
+                <div v-if="dataStatistics.length > 0">
+
+                    <v-sparkline
+                            :fill="true"
+                            :line-width="2"
+                            :padding="8"
+                            :smooth="10 || false"
+                            :value="[0, 2, 5, 9, 5, 10, 3, 5, 0, 0, 1, 8, 2, 9, 0]"
+                            auto-draw
+                    ></v-sparkline>
+
+                    <v-divider></v-divider>
+
+
+                </div>
+            </div>
+        </v-row>
     </v-container>
 </template>
 <script>
     import Papa from 'papaparse'
+    import jsPDF from 'jspdf'
+    // import html2canvas from 'hmtl2canvas';
 
     var {jStat} = require('jstat');
 
@@ -252,9 +273,24 @@
                 var fecha = new Date();
                 var pdfName = "presupuesto Solaire " + fecha.getDate() + "/" + (fecha.getMonth() + 1) + "/" + fecha.getFullYear();
                 var doc = new jsPDF();
-                doc.text(this.dataStatistics.toString(), 10, 10);
+                const contentHtml = this.$refs.content.innerHTML;
+                doc.text(contentHtml, 10, 10);
+                // doc.text(this.dataStatistics.toString(), 10, 10);
                 doc.save(pdfName + '.pdf');
-            }
+            },
+
+            // createPDFCSS() {
+            //     const doc = new jsPDF();
+            //     /** WITH CSS */
+            //     var canvasElement = document.createElement('canvas');
+            //     html2canvas(this.$refs.content, {
+            //         canvas: canvasElement
+            //     }).then(function (canvas) {
+            //         const img = canvas.toDataURL("image/jpeg", 0.8);
+            //         doc.addImage(img, 'JPEG', 20, 20);
+            //         doc.save("sample.pdf");
+            //     });
+            // },
         }
     }
 </script>
