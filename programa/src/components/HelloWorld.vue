@@ -112,7 +112,7 @@
     import jsPDF from 'jspdf'
     // import html2canvas from 'hmtl2canvas';
 
-    var {jStat} = require('jstat');
+    //var {jStat} = require('jstat');
 
     function SplitByMonth(Array) {
         var retArray = [];
@@ -173,7 +173,8 @@
             Mean() {
                 //const average = (...nums) => nums.reduce((acc, val) => acc + val, 0) / nums.length;
 
-                //Debugging:
+                //Debugging
+                //Parseo de datos a float
                 var datas =
                     this.filesData.map(function (datasets) {
                         //array por cada archivo
@@ -193,6 +194,7 @@
                     });
                 console.log("Previo a jstat transpose");
                 console.log(datas);
+
                 /**for (var i = 0; i < this.filesData.length; i++) {
                     datas[i] = jStat.transpose(datas[i]);
                 }
@@ -205,22 +207,57 @@
                         return jStat.transpose(val);
                     });
                 }); **/
-                var total = [];
 
-                console.log(this.filesData.length);
-                for (var i = 0; i < this.filesData.length; i++) {
+                //var total = [];
+
+                console.log('Has analizado ' + this.filesData.length + ' archivo/s.');
+
+                //bucle para calcular la media
+                /*for (var a = 0; a < this.filesData.length; a++) {
                     var medias = [];
-                    for (var j = 0; j < this.filesData[i].length; j++) {
+                    for (var mes = 0; mes < datas[a].length; mes++) {
+                        //datas[a].length pilla los 12 meses
                         var avg = [];
-                        for (var k = 0; k < datas[k].length; j++) {
-                            avg.push(jStat.mean(datas[i][j][k]));
+                        for (var dia = 0; dia < datas[a][mes].length; dia++) {
+                            //por cada fila de mes
+                            avg.push(jStat.mean(datas[a][mes][dia]));
                         }
                         medias.push(avg);
                     }
                     total.push(medias);
+                }*/
+
+                //inicializamos el array bidimensional
+                var mesEdificio = new Array(12);
+                for(var i = 0; i < mesEdificio.length; i++){
+                    mesEdificio[i] = new Array(17);
                 }
 
-                this.dataStatistics.push(total);
+                //hay que calcular la media por mes/edificio
+                for(var a = 0; a < this.filesData.length; a++){
+                    for(var mes = 0; mes < datas[a].length; mes++){
+                        var edActual = 0;
+                        while(edActual < 17){
+                            var enc = false;
+                            var suma = 0;
+                            for(var dia = 0; dia < datas[a][mes].length; dia++){
+                                for(var ed = 0; ed < datas[a][mes][dia].length && !enc; ed++){
+                                    if(edActual == ed){
+                                        suma += datas[a][mes][dia][ed];
+                                        enc = true;
+                                        //mesEdificio[mes][edActual] = datas[a][mes][dia][ed];
+                                    }
+                                }
+                                enc = false;
+                            }
+                            var media = suma / datas[a][mes].length;
+                            mesEdificio[mes][edActual] = media;
+                            edActual++;
+                        }
+                    }
+                }
+
+                this.dataStatistics.push(mesEdificio);
             },
             LoadedData(data) {
 
@@ -259,7 +296,7 @@
                         {
                             complete: (results) => {
                                 this.LoadedData(results);
-                                this.fileLoading = false;
+                                this.fileLoading = false
                             },
                             /**
                              step: (row) => {
