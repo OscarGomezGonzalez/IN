@@ -67,7 +67,6 @@
 
             <v-col class="mb-5" cols="12">
 
-
                 <v-row justify="center">
 
                 </v-row>
@@ -175,73 +174,74 @@
                 //const average = (...nums) => nums.reduce((acc, val) => acc + val, 0) / nums.length;
 
                 //Debugging:
-                var datas = this.filesData[0].map(function (val) {
-                    return val.map(function (arr) {
-                        return arr.slice(1).map(function (element) {
-                            return parseFloat(element);
+                var datas =
+                    this.filesData.map(function (datasets) {
+                        //array por cada archivo
+                        //Each dataset
+                        //console.log(datasets);
+                        return datasets.map(function (val) {
+                            // un array por cada dia
+                            //Each row of dataset
+                            return val.map(function (arr) {
+                                arr = arr.slice(1);
+                                return arr.map(function (element) {
+                                    return parseFloat(element);
+                                })
+                                //For each column removes the date and parses the elements as floats.
+                            });
                         });
                     });
-                });
-                datas = datas.map(function (val) {
-                    return jStat.transpose(val);
-                });
-
-                var medias = [];
-                var avg = [];
-
-                for (var i = 0; i < 12; i++) {
-                    avg = [];
-                    for (var j = 0; j < datas[i].length; j++) {
-                        avg.push(jStat.mean(datas[i][j]));
-                    }
-                    medias.push(avg);
+                console.log("Previo a jstat transpose");
+                console.log(datas);
+                /**for (var i = 0; i < this.filesData.length; i++) {
+                    datas[i] = jStat.transpose(datas[i]);
                 }
-                this.dataStatistics.push(medias);
+                 console.log("tras ejecutar jstat transpose");
+                 console.log(datas);
+                 */
+                /**datas = datas.map(function (datasets) {
+                    console.log(datasets);
+                    datasets.map(function (val) {
+                        return jStat.transpose(val);
+                    });
+                }); **/
+                var total = [];
+
+                console.log(this.filesData.length);
+                for (var i = 0; i < this.filesData.length; i++) {
+                    var medias = [];
+                    for (var j = 0; j < this.filesData[i].length; j++) {
+                        var avg = [];
+                        for (var k = 0; k < datas[k].length; j++) {
+                            avg.push(jStat.mean(datas[i][j][k]));
+                        }
+                        medias.push(avg);
+                    }
+                    total.push(medias);
+                }
+
+                this.dataStatistics.push(total);
             },
             LoadedData(data) {
 
-                if (this.filesData.includes(data)) {
-                    console.log("Error");
-                    console.log(data);
-                    this.error = "Error al cargar datos"
+                if (this.filesData.includes(data.data.slice(1))) {
+                    this.error = "Dataset ya cargado"
                     return;
                 }
-                console.log("Tamaño antes de incluir data " + this.filesData.length)
                 this.filesData.push(data);
+
                 if (this.filesData.length == 1) {
                     this.filesHeaders = this.filesData[0].data[0].slice(1);
+                } else {
+                    this.filesData[this.filesData.length - 1].data[0].slice(1);
                 }
-                console.log("Tamaño despues de incluir data " + this.filesData.length
-                    + "\nIndice: " + this.indice);
-                console.log(this.filesData[this.indice].data.length);
-                //This will filter the first row and first column of the matrix
-                //Map will execute a function for every element of the array, and as it is a matrix we'll need to
-                //indent a map inside a map function
-                var newArray = this.filesData.map(function (val) {
-                    //this will remove the first row and order based on date month
-                    var orderedArray = val.data.slice(1).sort((a, b) => a[0].split("/")[1] - b[0].split("/")[1]);
-                    //Splice array based in months
-                    console.log(orderedArray.length);
-                    console.log(orderedArray);
-                    return SplitByMonth(orderedArray);
-                    /**return val.data.slice(1).map(function (element) {
-                        //this will remove the first column
-                        //return element.slice(1);
-                        return element.sort((a,b)=> b[0].split("/")[1] - a[0].split("/")[1]);
-                    });
-                     **/
-                });
-                this.filesData = newArray;
+
+                var orderedArray = this.filesData[this.filesData.length - 1].data.slice(1)
+                    .sort((a, b) => a[0].split("/")[1] - b[0].split("/")[1]);
+                //Splice array based in months
+                this.filesData[this.filesData.length - 1] = SplitByMonth(orderedArray);
                 this.indice = this.indice + 1;
             },
-            /**
-             loadingBar(row) {
-                var progress = row.indexes[0];
-                var newPercent = Math.round(progress / this.fileSize * 100);
-                if (newPercent === this.fileProgress) return;
-                this.fileProgress = newPercent;
-            },
-             */
             importTxt() {
 
                 if (this.chosenFiles.length == 0) {
@@ -267,7 +267,20 @@
                             }
                              */
                         });
+
                 }
+
+                //This will filter the first row and first column of the matrix
+                //Map will execute a function for every element of the array, and as it is a matrix we'll need to
+                //indent a map inside a map function
+                /**var newArray = this.filesData.map(function (val) {
+                    //this will remove the first row and order based on date month
+                    var orderedArray = val.data.slice(1).sort((a, b) => a[0].split("/")[1] - b[0].split("/")[1]);
+                    //Splice array based in months
+                    return SplitByMonth(orderedArray);
+                });
+                 this.filesData = newArray;
+                 */
             },
             createPDF() {
                 var fecha = new Date();
