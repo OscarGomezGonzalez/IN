@@ -52,6 +52,7 @@
                     -->
                     <v-btn @click="Mean" rounded primary>Analizar</v-btn>
                     <div v-if="dataStatistics.length > 0">
+                        <br>
                         <v-btn @click="createPDF" rounded primary>PDF</v-btn>
                     </div>
                     <p v-if="average !=null"></p>
@@ -112,7 +113,7 @@
     import jsPDF from 'jspdf'
     // import html2canvas from 'hmtl2canvas';
 
-    //var {jStat} = require('jstat');
+    var {jStat} = require('jstat');
 
     function SplitByMonth(Array) {
         var retArray = [];
@@ -171,93 +172,61 @@
         },
         methods: {
             Mean() {
-                //const average = (...nums) => nums.reduce((acc, val) => acc + val, 0) / nums.length;
-
-                //Debugging
                 //Parseo de datos a float
                 var datas =
                     this.filesData.map(function (datasets) {
                         //array por cada archivo
-                        //Each dataset
-                        //console.log(datasets);
                         return datasets.map(function (val) {
                             // un array por cada dia
-                            //Each row of dataset
                             return val.map(function (arr) {
                                 arr = arr.slice(1);
                                 return arr.map(function (element) {
                                     return parseFloat(element);
                                 })
-                                //For each column removes the date and parses the elements as floats.
+                                //Por cada fila se elemina la fecha y se parsea a float.
                             });
                         });
                     });
-                console.log("Previo a jstat transpose");
-                console.log(datas);
 
-                /**for (var i = 0; i < this.filesData.length; i++) {
-                    datas[i] = jStat.transpose(datas[i]);
+                //Vamos a transponer los meses
+                for(var el = 0; el < datas.length; el++){
+                    for(var m = 0; m < datas[el].length; m++){
+                        datas[el][m] = jStat.transpose(datas[el][m]);
+                    }
                 }
-                 console.log("tras ejecutar jstat transpose");
-                 console.log(datas);
-                 */
-                /**datas = datas.map(function (datasets) {
-                    console.log(datasets);
-                    datasets.map(function (val) {
-                        return jStat.transpose(val);
-                    });
-                }); **/
 
-                //var total = [];
-
+                console.log('Después de transponer los meses');
+                console.log(datas);
                 console.log('Has analizado ' + this.filesData.length + ' archivo/s.');
 
-                //bucle para calcular la media
-                /*for (var a = 0; a < this.filesData.length; a++) {
-                    var medias = [];
-                    for (var mes = 0; mes < datas[a].length; mes++) {
-                        //datas[a].length pilla los 12 meses
-                        var avg = [];
-                        for (var dia = 0; dia < datas[a][mes].length; dia++) {
-                            //por cada fila de mes
-                            avg.push(jStat.mean(datas[a][mes][dia]));
-                        }
-                        medias.push(avg);
-                    }
-                    total.push(medias);
-                }*/
-
-                //inicializamos el array bidimensional
-                var mesEdificio = new Array(12);
-                for(var i = 0; i < mesEdificio.length; i++){
-                    mesEdificio[i] = new Array(17);
+                //array de [edificio][mes]
+                var edificioMes = new Array(17);
+                for(var i = 0; i < edificioMes.length; i++){
+                    edificioMes[i] = new Array(12);
                 }
 
-                //hay que calcular la media por mes/edificio
-                for(var a = 0; a < this.filesData.length; a++){
-                    for(var mes = 0; mes < datas[a].length; mes++){
-                        var edActual = 0;
-                        while(edActual < 17){
+                for(el = 0; el < datas.length; el++){
+                    var fin = false;
+                    var eActual = 0;
+                    while(!fin) { //mientras no hayamos acabado, seguimos iterando meses
+                        for (m = 0; m < datas[el].length; m++) {
                             var enc = false;
-                            var suma = 0;
-                            for(var dia = 0; dia < datas[a][mes].length; dia++){
-                                for(var ed = 0; ed < datas[a][mes][dia].length && !enc; ed++){
-                                    if(edActual == ed){
-                                        suma += datas[a][mes][dia][ed];
-                                        enc = true;
-                                        //mesEdificio[mes][edActual] = datas[a][mes][dia][ed];
-                                    }
+                            for (var e = 0; e < datas[el][m].length && !enc; e++) {
+                                if (e == eActual) { //si es el edificio que buscamos
+                                    edificioMes[e][m] = jStat.mean(datas[el][m][e]); //calculamos la media para el edificio segun el mes
+                                    enc = true;
                                 }
-                                enc = false;
                             }
-                            var media = suma / datas[a][mes].length;
-                            mesEdificio[mes][edActual] = media;
-                            edActual++;
+                        }
+                        eActual++;
+                        if(eActual == 17){
+                            fin = true;
                         }
                     }
                 }
 
-                this.dataStatistics.push(mesEdificio);
+                console.log(edificioMes); //se muestra por consola
+                this.dataStatistics.push(edificioMes); //lo almacenamos en la variable global
             },
             LoadedData(data) {
 
