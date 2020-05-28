@@ -1,17 +1,15 @@
 <template>
     <v-container>
         <v-row class="text-center">
-
-            <v-col cols="6">
+            <v-col>
                 <v-img
                         src="https://www.mairenainforma.es/wp-content/uploads/2015/03/torre.jpg"
                         class="my-3"
                         contain
                         height="700"
-
                 />
             </v-col>
-            <v-col cols="6">
+            <v-col>
                 <v-img
                         src="../assets/images/solaire.png"
                         class="my-3"
@@ -23,13 +21,13 @@
                 </h1>
                 <v-form v-on:submit.prevent="importTxt">
                     <v-row>
-                        <v-col cols="10">
+                        <v-col cols="9">
                             <!--accept=".csv"-->
-                            <v-file-input multiple v-model="chosenFiles" type="file" label="Seleccionar datos a cargar"
+                            <v-file-input multiple v-model="chosenFiles" type="file" width="100%" label="Seleccionar datos a cargar"
                                           dense></v-file-input>
                         </v-col>
-                        <v-col cols="2">
-                            <v-btn type="submit" rounded color="primary">Cargar datos</v-btn>
+                        <v-col cols="3">
+                            <v-btn type="submit" width="100%" rounded color="primary">Cargar</v-btn>
                         </v-col>
                     </v-row>
                 </v-form>
@@ -50,14 +48,14 @@
                         </v-card>
                     </v-col>
                     -->
-                    <v-btn @click="Mean" rounded primary>Analizar</v-btn>
-                    <div v-if="dataStatistics.length > 0">
+                    <v-btn @click="Analyze" rounded primary>Analizar</v-btn>
+                    <div v-if="dataMean.length > 0">
                         <br>
                         <v-btn @click="createPDF" rounded primary>PDF</v-btn>
                     </div>
                     <p v-if="average !=null"></p>
                 </div>
-                <v-form>
+                <v-form width="100%">
                     <v-text-field label="Porcentaje(%)" v-model="porcentaje">70</v-text-field>
                     <h3>PANEL</h3>
                     <v-text-field label="KWatio" v-model="panelKW" value="1.3"></v-text-field>
@@ -66,30 +64,10 @@
             </v-col>
 
 
-            <v-col class="mb-5" cols="12">
-
-                <v-row justify="center">
-
-                </v-row>
-            </v-col>
-
-            <v-col class="mb-5" cols="12">
-
-
-                <v-row justify="center">
-
-                </v-row>
-            </v-col>
-
-            <v-col class="mb-5" cols="12">
-                <v-row justify="center">
-
-                </v-row>
-            </v-col>
         </v-row>
         <v-row class="text-center">
             <div ref="content">
-                <div v-if="dataStatistics.length > 0">
+                <div v-if="dataMean.length > 0">
 
                     <v-sparkline
                             :fill="true"
@@ -164,6 +142,9 @@
                 fileProgress: 0,
                 filesData: [],
                 dataStatistics: [],
+                dataMean: [],
+                dataQuartiles: [],
+                dataPercentiles: [],
                 filesHeaders: [],
                 fileSize: 0,
                 average: null,
@@ -171,7 +152,7 @@
             }
         },
         methods: {
-            Mean() {
+            Analyze() {
                 //Parseo de datos a float
                 var datas =
                     this.filesData.map(function (datasets) {
@@ -183,7 +164,7 @@
                                 return arr.map(function (element) {
                                     return parseFloat(element);
                                 })
-                                //Por cada fila se elemina la fecha y se parsea a float.
+                                //Por cada fila se elimina la fecha y se parsea a float.
                             });
                         });
                     });
@@ -205,6 +186,7 @@
                     edificioMes[i] = new Array(12);
                 }
 
+                //cálculo de la media
                 for(el = 0; el < datas.length; el++){
                     var fin = false;
                     var eActual = 0;
@@ -225,8 +207,31 @@
                     }
                 }
 
-                console.log(edificioMes); //se muestra por consola
-                this.dataStatistics.push(edificioMes); //lo almacenamos en la variable global
+                this.dataMean.push(edificioMes); //almacenamos las medias en la variable global
+
+                //cálculo de los cuartiles
+                for(el = 0; el < datas.length; el++){
+                    fin = false;
+                    eActual = 0;
+                    while(!fin) { //mientras no hayamos acabado, seguimos iterando meses
+                        for (m = 0; m < datas[el].length; m++) {
+                            enc = false;
+                            for (e = 0; e < datas[el][m].length && !enc; e++) {
+                                if (e == eActual) { //si es el edificio que buscamos
+                                    edificioMes[e][m] = jStat.quartiles(datas[el][m][e]); //calculamos los cuartiles para el edificio segun el mes
+                                    console.log(jStat.median(datas[el][m][e]));
+                                    enc = true;
+                                }
+                            }
+                        }
+                        eActual++;
+                        if(eActual == 17){
+                            fin = true;
+                        }
+                    }
+                }
+
+                this.dataQuartiles.push(edificioMes); //almacenamos los cuartiles en la variable global
             },
             LoadedData(data) {
 
@@ -313,4 +318,3 @@
         }
     }
 </script>
-

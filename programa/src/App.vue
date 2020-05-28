@@ -15,7 +15,7 @@
                         width="40"
                 />
 
-                <h1>Solaire</h1>
+                <span style="font-size: 11pt; text-transform: uppercase; font-weight: bold; font-family: Roboto; letter-spacing: 1px;">Solaire</span>
             </div>
 
             <v-spacer></v-spacer>
@@ -25,10 +25,10 @@
                 <input type="checkbox" id='theme-switch' class='theme-switch' v-model="$vuetify.theme.dark"/>
                 <label for='theme-switch'>
                          <span v-if="$vuetify.theme.dark === true">
-                             <img alt="logo" src="./assets/images/moon.png" width="40">
+                             <img alt="logo" src="./assets/images/moon.png" width="30">
                          </span>
                         <span v-else>
-                             <img alt="logo" src="./assets/images/sun.png" width="40">
+                             <img alt="logo" src="./assets/images/sun.png" width="30">
                          </span>
                 </label>
             </div>
@@ -40,7 +40,7 @@
                     target="_blank"
                     text
             >
-                <span class="mr-2">GITHUB Project</span>
+                <span class="mr-2">GITHUB</span>
                 <v-icon>mdi-open-in-new</v-icon>
             </v-btn>
         </v-app-bar>
