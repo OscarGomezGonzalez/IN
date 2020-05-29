@@ -48,6 +48,8 @@
                         </v-card>
                     </v-col>
                     -->
+
+                    <v-text-field label="Porcentaje(%)" v-model="porcentaje">70</v-text-field>
                     <v-btn @click="Analyze" rounded primary>Analizar</v-btn>
                     <div v-if="dataMean.length > 0">
                         <br>
@@ -56,7 +58,6 @@
                     <p v-if="average !=null"></p>
                 </div>
                 <v-form width="100%">
-                    <v-text-field label="Porcentaje(%)" v-model="porcentaje">70</v-text-field>
                     <h3>PANEL</h3>
                     <v-text-field label="KWatio" v-model="panelKW" value="1.3"></v-text-field>
                     <v-text-field label="MetrosPanel" v-model="panelMeters" value="0.3">70</v-text-field>
@@ -170,8 +171,8 @@
                     });
 
                 //Vamos a transponer los meses
-                for(var el = 0; el < datas.length; el++){
-                    for(var m = 0; m < datas[el].length; m++){
+                for (var el = 0; el < datas.length; el++) {
+                    for (var m = 0; m < datas[el].length; m++) {
                         datas[el][m] = jStat.transpose(datas[el][m]);
                     }
                 }
@@ -182,15 +183,15 @@
 
                 //array de [edificio][mes]
                 var edificioMes = new Array(17);
-                for(var i = 0; i < edificioMes.length; i++){
+                for (var i = 0; i < edificioMes.length; i++) {
                     edificioMes[i] = new Array(12);
                 }
 
                 //cálculo de la media
-                for(el = 0; el < datas.length; el++){
+                for (el = 0; el < datas.length; el++) {
                     var fin = false;
                     var eActual = 0;
-                    while(!fin) { //mientras no hayamos acabado, seguimos iterando meses
+                    while (!fin) { //mientras no hayamos acabado, seguimos iterando meses
                         for (m = 0; m < datas[el].length; m++) {
                             var enc = false;
                             for (var e = 0; e < datas[el][m].length && !enc; e++) {
@@ -201,7 +202,7 @@
                             }
                         }
                         eActual++;
-                        if(eActual == 17){
+                        if (eActual == 17) {
                             fin = true;
                         }
                     }
@@ -209,29 +210,59 @@
 
                 this.dataMean.push(edificioMes); //almacenamos las medias en la variable global
 
+
                 //cálculo de los cuartiles
-                for(el = 0; el < datas.length; el++){
+                for (el = 0; el < datas.length; el++) {
                     fin = false;
                     eActual = 0;
-                    while(!fin) { //mientras no hayamos acabado, seguimos iterando meses
+                    while (!fin) { //mientras no hayamos acabado, seguimos iterando meses
                         for (m = 0; m < datas[el].length; m++) {
                             enc = false;
                             for (e = 0; e < datas[el][m].length && !enc; e++) {
                                 if (e == eActual) { //si es el edificio que buscamos
                                     edificioMes[e][m] = jStat.quartiles(datas[el][m][e]); //calculamos los cuartiles para el edificio segun el mes
-                                    console.log(jStat.median(datas[el][m][e]));
+                                    //console.log(jStat.median(datas[el][m][e]));
                                     enc = true;
                                 }
                             }
                         }
                         eActual++;
-                        if(eActual == 17){
+                        if (eActual == 17) {
                             fin = true;
                         }
                     }
                 }
 
                 this.dataQuartiles.push(edificioMes); //almacenamos los cuartiles en la variable global
+
+                //Calculo percentil seleccionado
+                //for para cada archivo
+                console.log(this.porcentaje/100);
+                var archivo = [];
+                for (i = 0; i < datas.length; i++) {
+                    //For para cada mes
+                    var meses = [];
+                    for (var j = 0; j < datas[i].length; j++) {
+                        //for para cada edf
+
+                        var edificios = [];
+                        for (var k = 0; k < datas[i][j].length; k++) {
+                            edificios.push(jStat.percentile(datas[i][j][k], this.porcentaje/100))
+                        }
+                        meses.push(edificios);
+                    }
+                    archivo.push(meses);
+                }
+                this.dataPercentiles.push(archivo);
+                //this.buildingsItems = [...Array(this.dataPercentiles[0][0].length).keys()];
+                //console.log(this.buildingsItems);
+                //console.log([...Array(this.dataPercentiles[0][0].length).keys()]);
+
+            },
+            ReloadGraph(){
+                if(this.buildingSelected != null){
+                    this.dataSelected = this.dataPercentiles[0][0][this.buildingSelected];
+                }
             },
             LoadedData(data) {
 
