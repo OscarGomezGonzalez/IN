@@ -23,7 +23,8 @@
                     <v-row>
                         <v-col cols="9">
                             <!--accept=".csv"-->
-                            <v-file-input multiple v-model="chosenFiles" type="file" width="100%" label="Seleccionar datos a cargar"
+                            <v-file-input multiple v-model="chosenFiles" type="file" width="100%"
+                                          label="Seleccionar datos a cargar"
                                           dense></v-file-input>
                         </v-col>
                         <v-col cols="3">
@@ -69,7 +70,7 @@
         <v-row class="text-center">
             <div ref="content">
                 <div v-if="dataMean.length > 0">
-
+                    <v-select :items="buildingItems" :value="buildingSelected" v-on:change="ReloadGraph" ></v-select>
                     <v-sparkline
                             :fill="true"
                             :line-width="2"
@@ -148,6 +149,9 @@
                 dataPercentiles: [],
                 filesHeaders: [],
                 fileSize: 0,
+                buildingSelected: null,
+                buildingItems: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
+                dataSelected: null,
                 average: null,
                 indice: 0,
             }
@@ -237,7 +241,7 @@
 
                 //Calculo percentil seleccionado
                 //for para cada archivo
-                console.log(this.porcentaje/100);
+                console.log(this.porcentaje / 100);
                 var archivo = [];
                 for (i = 0; i < datas.length; i++) {
                     //For para cada mes
@@ -247,7 +251,7 @@
 
                         var edificios = [];
                         for (var k = 0; k < datas[i][j].length; k++) {
-                            edificios.push(jStat.percentile(datas[i][j][k], this.porcentaje/100))
+                            edificios.push(jStat.percentile(datas[i][j][k], this.porcentaje / 100))
                         }
                         meses.push(edificios);
                     }
@@ -259,8 +263,8 @@
                 //console.log([...Array(this.dataPercentiles[0][0].length).keys()]);
 
             },
-            ReloadGraph(){
-                if(this.buildingSelected != null){
+            ReloadGraph() {
+                if (this.buildingSelected != null) {
                     this.dataSelected = this.dataPercentiles[0][0][this.buildingSelected];
                 }
             },
