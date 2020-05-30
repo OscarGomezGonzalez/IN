@@ -68,23 +68,23 @@
 
         </v-row>
         <v-row class="text-center">
-            <div ref="content">
+            <v-col cols="12" ref="content">
                 <div v-if="dataMean.length > 0">
-                    <v-select :items="buildingItems" :value="buildingSelected" v-on:change="ReloadGraph" ></v-select>
-                    <v-sparkline
-                            :fill="true"
-                            :line-width="2"
-                            :padding="8"
-                            :smooth="10 || false"
-                            :value="[0, 2, 5, 9, 5, 10, 3, 5, 0, 0, 1, 8, 2, 9, 0]"
-                            auto-draw
+                    <v-select :items="buildingItems" v-model="buildingSelected" v-on:change="ReloadGraph"></v-select>
+                    <v-sparkline v-if="buildingSelected != null"
+                                 :fill="true"
+                                 :line-width="2"
+                                 :padding="20"
+                                 :smooth="10 || false"
+                                 :value="dataSelected"
+                                 auto-draw
                     ></v-sparkline>
 
                     <v-divider></v-divider>
 
 
                 </div>
-            </div>
+            </v-col>
         </v-row>
     </v-container>
 </template>
@@ -265,7 +265,9 @@
             },
             ReloadGraph() {
                 if (this.buildingSelected != null) {
-                    this.dataSelected = this.dataPercentiles[0][0][this.buildingSelected];
+                    var arr = this.dataPercentiles[0][0][this.buildingSelected];
+                    console.log(arr);
+                    this.dataSelected = arr;
                 }
             },
             LoadedData(data) {
