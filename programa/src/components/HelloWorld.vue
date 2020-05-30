@@ -51,13 +51,16 @@
                     -->
 
                     <v-text-field label="Porcentaje(%)" v-model="porcentaje">70</v-text-field>
+
                     <v-btn @click="Analyze" rounded primary>Analizar</v-btn>
-                    <div v-if="dataQuartiles.length > 0">
-                        <br>
-                        <v-btn @click="createPDF" rounded primary>PDF</v-btn>
-                    </div>
+
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+
+                    <v-btn v-if="dataQuartiles.length > 0" @click="createPDF" rounded primary>PDF</v-btn>
+
                     <p v-if="average !=null"></p>
                 </div>
+                <br>
                 <v-form width="100%">
                     <h3>PANEL</h3>
                     <v-text-field label="KWatio" v-model="panelKW" value="1.3"></v-text-field>
@@ -65,32 +68,36 @@
                 </v-form>
             </v-col>
 
-
         </v-row>
         <v-row class="text-center">
             <v-col cols="12" ref="content">
                 <div v-if="dataMean.length > 0">
-                    <v-select :items="buildingItems" v-model="buildingSelected" v-on:change="ReloadGraph"></v-select>
-                    <v-sparkline v-if="buildingSelected != null"
-                                 :fill="true"
-                                 :line-width="2"
-                                 :padding="20"
-                                 :smooth="10 || false"
-                                 :value="dataSelected"
-                                 auto-draw
-                    ></v-sparkline>
+                    <v-select :items="items" label="Elige el edificio" v-model="buildingSelected" v-on:change="ReloadGraph"></v-select>
+
+                    <line-chart v-if="buildingSelected != null && $vuetify.theme.dark === false"
+                                :data="dataSelected"
+                                :round="2"
+                                suffix="Kw"
+                    ></line-chart>
+
+                    <line-chart v-if="buildingSelected != null && $vuetify.theme.dark === true"
+                                :data="dataSelected"
+                                :round="2"
+                                :colors="['grey']"
+                                suffix="Kw"
+                    ></line-chart>
 
                     <v-divider></v-divider>
-
-
                 </div>
             </v-col>
         </v-row>
     </v-container>
 </template>
+
 <script>
     import Papa from 'papaparse'
     import jsPDF from 'jspdf'
+
     // import html2canvas from 'hmtl2canvas';
 
     var {jStat} = require('jstat');
@@ -152,32 +159,84 @@
                 dataPercentiles: [],
                 fileSize: 0,
                 buildingSelected: null,
-                buildingItems: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
+                items: [
+                    {
+                        text: 'Edificio 1',
+                        value: 0
+                    },
+                    {
+                        text: 'Edificio 2',
+                        value: 1
+                    },
+                    {
+                        text: 'Edificio 3',
+                        value: 2
+                    },
+                    {
+                        text: 'Edificio 6',
+                        value: 3
+                    },
+                    {
+                        text: 'Edificio 7',
+                        value: 4
+                    },
+                    {
+                        text: 'Edificio 8',
+                        value: 5
+                    },
+                    {
+                        text: 'Edificio 10',
+                        value: 6
+                    },
+                    {
+                        text: 'Edificio 12',
+                        value: 7
+                    },
+                    {
+                        text: 'Edificio 14',
+                        value: 8
+                    },
+                    {
+                        text: 'Edificio 15',
+                        value: 9
+                    },
+                    {
+                        text: 'Edificio 17',
+                        value: 10
+                    },
+                    {
+                        text: 'Edificio 24',
+                        value: 11
+                    },
+                    {
+                        text: 'Edificio 25',
+                        value: 12
+                    },
+                    {
+                        text: 'Edificio 32',
+                        value: 13
+                    },
+                    {
+                        text: 'Edificio 37',
+                        value: 14
+                    },
+                    {
+                        text: 'Edificio 42',
+                        value: 15
+                    },
+                    {
+                        text: 'Edificio 44',
+                        value: 16
+                    },
+                ],
+                monthsLabels: ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
                 dataSelected: null,
                 average: null,
                 indice: 0,
-                chartdata: {
-                    labels: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
-                    datasets: [
-                        {
-                            label: 'Data One',
-                            backgroundColor: 'dark',
-                            data: 'dataSelected'
-                        }
-                    ]
-                },
-                options: {
-                    type: Object,
-                    default: null
-                }
             }
 
         },
         methods: {
-
-            mounted() {
-                this.renderChart(this.chartdata, this.options)
-            },
             Analyze() {
                 //Parseo de datos a float
                 var datas =
@@ -237,9 +296,23 @@
             ReloadGraph() {
                 if (this.buildingSelected != null) {
                     var arr = this.dataMean[this.buildingSelected];
-                    console.log(arr);
-                    this.dataSelected = arr;
+                    var res = this.createArray(this.monthsLabels, arr);
+                    this.dataSelected = res;
                 }
+            },
+            createArray(vector1, vector2) { //asigna el valor a cada mes para poder mostrarlo en line-chart
+                //nuevo array bidimensional vacio de 12x2
+                var res = new Array(12);
+                for(var i = 0; i < res.length; i++){
+                    res[i] = new Array(2);
+                }
+
+                for(i = 0; i < 12; i++){
+                    res[i][0] = vector1[i];
+                    res[i][1] = vector2[i];
+                }
+
+                return res;
             },
             LoadedData(data) {
 
