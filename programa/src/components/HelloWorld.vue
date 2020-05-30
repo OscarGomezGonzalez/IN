@@ -52,7 +52,7 @@
 
                     <v-text-field label="Porcentaje(%)" v-model="porcentaje">70</v-text-field>
                     <v-btn @click="Analyze" rounded primary>Analizar</v-btn>
-                    <div v-if="dataMean.length > 0">
+                    <div v-if="dataQuartiles.length > 0">
                         <br>
                         <v-btn @click="createPDF" rounded primary>PDF</v-btn>
                     </div>
@@ -135,28 +135,49 @@
         name: 'HelloWorld',
         data: function () {
             return {
+                dark: '#222',
+                white: '#fff',
+                error: null,
                 panelMeters: 0.5,
                 porcentaje: 70,
                 panelKW: 1.3,
                 chosenFiles: [],
-                error: null,
+                filesHeaders: [],
                 fileLoading: false,
                 fileProgress: 0,
                 filesData: [],
                 dataStatistics: [],
-                dataMean: [],
                 dataQuartiles: [],
+                dataMean: [],
                 dataPercentiles: [],
-                filesHeaders: [],
                 fileSize: 0,
                 buildingSelected: null,
                 buildingItems: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
                 dataSelected: null,
                 average: null,
                 indice: 0,
+                chartdata: {
+                    labels: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+                    datasets: [
+                        {
+                            label: 'Data One',
+                            backgroundColor: 'dark',
+                            data: 'dataSelected'
+                        }
+                    ]
+                },
+                options: {
+                    type: Object,
+                    default: null
+                }
             }
+
         },
         methods: {
+
+            mounted() {
+                this.renderChart(this.chartdata, this.options)
+            },
             Analyze() {
                 //Parseo de datos a float
                 var datas =
@@ -180,92 +201,42 @@
                         datas[el][m] = jStat.transpose(datas[el][m]);
                     }
                 }
-
-                console.log('Después de transponer los meses');
-                console.log(datas);
-                console.log('Has analizado ' + this.filesData.length + ' archivo/s.');
-
-                //array de [edificio][mes]
-                var edificioMes = new Array(17);
-                for (var i = 0; i < edificioMes.length; i++) {
-                    edificioMes[i] = new Array(12);
+                var edificioMesPercentil = new Array(17);
+                for (var i = 0; i < edificioMesPercentil.length; i++) {
+                    edificioMesPercentil[i] = new Array(12);
+                }
+                var edificioMesQuartiles = new Array(17);
+                for (i = 0; i < edificioMesQuartiles.length; i++) {
+                    edificioMesQuartiles[i] = new Array(12);
                 }
 
-                //cálculo de la media
-                for (el = 0; el < datas.length; el++) {
-                    var fin = false;
-                    var eActual = 0;
-                    while (!fin) { //mientras no hayamos acabado, seguimos iterando meses
-                        for (m = 0; m < datas[el].length; m++) {
-                            var enc = false;
-                            for (var e = 0; e < datas[el][m].length && !enc; e++) {
-                                if (e == eActual) { //si es el edificio que buscamos
-                                    edificioMes[e][m] = jStat.mean(datas[el][m][e]); //calculamos la media para el edificio segun el mes
-                                    enc = true;
-                                }
-                            }
+                var edificioMesMean = new Array(17);
+                for (i = 0; i < edificioMesMean.length; i++) {
+                    edificioMesMean[i] = new Array(12);
+                }
+                //Recorrido por cada edf
+                for (i = 0; i < datas[0][0].length; i++) {
+                    //por cada mes
+                    for (var j = 0; j < datas[0].length; j++) {
+                        var aux = [];
+                        //recorrido por cada archivo
+                        for (var k = 0; k < datas.length; k++) {
+                            aux = aux.concat(datas[k][j][i]);
                         }
-                        eActual++;
-                        if (eActual == 17) {
-                            fin = true;
-                        }
+                        edificioMesPercentil[i][j] = jStat.percentile(aux, this.porcentaje / 100);
+                        edificioMesQuartiles[i][j] = jStat.quartiles(aux);
+                        edificioMesMean[i][j] = jStat.mean(aux);
                     }
                 }
 
-                this.dataMean.push(edificioMes); //almacenamos las medias en la variable global
-
-
-                //cálculo de los cuartiles
-                for (el = 0; el < datas.length; el++) {
-                    fin = false;
-                    eActual = 0;
-                    while (!fin) { //mientras no hayamos acabado, seguimos iterando meses
-                        for (m = 0; m < datas[el].length; m++) {
-                            enc = false;
-                            for (e = 0; e < datas[el][m].length && !enc; e++) {
-                                if (e == eActual) { //si es el edificio que buscamos
-                                    edificioMes[e][m] = jStat.quartiles(datas[el][m][e]); //calculamos los cuartiles para el edificio segun el mes
-                                    //console.log(jStat.median(datas[el][m][e]));
-                                    enc = true;
-                                }
-                            }
-                        }
-                        eActual++;
-                        if (eActual == 17) {
-                            fin = true;
-                        }
-                    }
-                }
-
-                this.dataQuartiles.push(edificioMes); //almacenamos los cuartiles en la variable global
-
-                //Calculo percentil seleccionado
-                //for para cada archivo
-                console.log(this.porcentaje / 100);
-                var archivo = [];
-                for (i = 0; i < datas.length; i++) {
-                    //For para cada mes
-                    var meses = [];
-                    for (var j = 0; j < datas[i].length; j++) {
-                        //for para cada edf
-
-                        var edificios = [];
-                        for (var k = 0; k < datas[i][j].length; k++) {
-                            edificios.push(jStat.percentile(datas[i][j][k], this.porcentaje / 100))
-                        }
-                        meses.push(edificios);
-                    }
-                    archivo.push(meses);
-                }
-                this.dataPercentiles.push(archivo);
-                //this.buildingsItems = [...Array(this.dataPercentiles[0][0].length).keys()];
-                //console.log(this.buildingsItems);
-                //console.log([...Array(this.dataPercentiles[0][0].length).keys()]);
+                this.dataPercentiles = this.dataPercentiles.concat(edificioMesPercentil);
+                this.dataQuartiles = edificioMesQuartiles;
+                this.dataMean = edificioMesMean;
 
             },
             ReloadGraph() {
                 if (this.buildingSelected != null) {
-                    var arr = this.dataPercentiles[0][0][this.buildingSelected];
+                    var arr = this.dataMean[this.buildingSelected];
                     console.log(arr);
                     this.dataSelected = arr;
                 }
