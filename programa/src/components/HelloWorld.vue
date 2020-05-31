@@ -63,8 +63,12 @@
                 <br>
                 <v-form width="100%">
                     <h3>PANEL</h3>
-                    <v-text-field label="KWatio" v-model="panelKW" value="1.3"></v-text-field>
-                    <v-text-field label="MetrosPanel" v-model="panelMeters" value="0.3">70</v-text-field>
+                    <v-text-field label="Vatios" v-model="panelW" value="400"></v-text-field>
+                    <v-text-field label="Precio por panel(euros)" v-model="panelPrecio" value="100"></v-text-field>
+                    <v-text-field label="Longitud del panel(mm)" v-model="panelLong" value="0.3">70</v-text-field>
+                    <v-text-field label="Ancho del panel(mm)" v-model="panelAnc" value="0.3">70</v-text-field>
+                    <v-text-field label="Altura del panel(mm)" v-model="panelAlt" value="0.3">70</v-text-field>
+                    <v-btn @click="calcularPaneles" rounded primary>Calcular paneles</v-btn>
                 </v-form>
             </v-col>
 
@@ -148,9 +152,19 @@
                 dark: '#222',
                 white: '#fff',
                 error: null,
-                panelMeters: 0.5,
+                panelLong: 2008,
+                panelAnc: 1002,
+                panelAlt: 40,
+                panelPrecio: 168.58,
+                panelPerdida10: 0.9,
+                panelPerdida25: 0.8,
+                panelTotalProducido10: [],
+                panelTotalProducido25: [],
+                UpoSol: [2.5, 3.7, 5.1, 6.2, 7.1, 7.9, 7.8, 7.1, 5.7, 4.2, 3, 2.4],
+                UpoMedia: 5.225,
                 porcentaje: 70,
-                panelKW: 1.3,
+                panelW: 400,
+                cantidadPaneles: 0,
                 chosenFiles: [],
                 filesHeaders: [],
                 fileLoading: false,
@@ -239,6 +253,7 @@
             }
 
         },
+        
         methods: {
             Analyze() {
                 //Parseo de datos a float
@@ -313,6 +328,7 @@
                     this.dataSelected = res;
                 }
             },
+
             createArray(vector1, vector2) { //asigna el valor a cada mes para poder mostrarlo en line-chart
                 //nuevo array bidimensional vacio de 12x2
                 var res = new Array(12);
@@ -327,6 +343,7 @@
 
                 return res;
             },
+
             LoadedData(data) {
 
                 if (this.filesData.includes(data.data.slice(1))) {
@@ -347,6 +364,7 @@
                 this.filesData[this.filesData.length - 1] = SplitByMonth(orderedArray);
                 this.indice = this.indice + 1;
             },
+
             importTxt() {
 
                 if (this.chosenFiles.length == 0) {
@@ -387,6 +405,19 @@
                  this.filesData = newArray;
                  */
             },
+
+            calcularPaneles() {
+                this.cantidadPaneles = 0;
+                var cantidadAProducir = 0;
+                this.cantidadPaneles = Math.ceil(cantidadAProducir / (this.panelW * this.UpoMedia * this.panelPerdida25));
+            },
+
+            produccionPaneles() {
+                this.panelTotalProducido10 = this.panelW * this.panelPerdida10 * this.UpoMedia;
+                this.panelTotalProducido25 = this.panelW * this.panelPerdida1025 * this.UpoMedia;
+
+            },
+
             createPDF() {
                 var fecha = new Date();
                 var pdfName = "presupuesto Solaire " + fecha.getDate() + "/" + (fecha.getMonth() + 1) + "/" + fecha.getFullYear();
