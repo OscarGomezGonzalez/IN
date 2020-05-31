@@ -72,17 +72,20 @@
         <v-row class="text-center">
             <v-col cols="12" ref="content">
                 <div v-if="dataMean.length > 0">
-                    <v-select :items="items" label="Elige el edificio" v-model="buildingSelected" v-on:change="ReloadGraph"></v-select>
+                    <v-select :items="items" label="Elige el edificio" v-model="buildingSelected"
+                              v-on:change="ReloadGraph"></v-select>
 
                     <line-chart v-if="buildingSelected != null && $vuetify.theme.dark === false"
                                 :data="dataSelected"
                                 :round="2"
+                                :curve="false"
                                 suffix="Kw"
                     ></line-chart>
 
                     <line-chart v-if="buildingSelected != null && $vuetify.theme.dark === true"
                                 :data="dataSelected"
                                 :round="2"
+                                :curve="false"
                                 :colors="['grey']"
                                 suffix="Kw"
                     ></line-chart>
@@ -229,7 +232,7 @@
                         value: 16
                     },
                 ],
-                monthsLabels: ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
+                monthsLabels: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
                 dataSelected: null,
                 average: null,
                 indice: 0,
@@ -293,24 +296,34 @@
                 this.dataMean = edificioMesMean;
 
             },
+
             ReloadGraph() {
                 if (this.buildingSelected != null) {
-                    var arr = this.dataMean[this.buildingSelected];
-                    var res = this.createArray(this.monthsLabels, arr);
+                    var arrMean = this.dataQuartiles[this.buildingSelected];
+                    var arrPercentile = this.dataPercentiles[this.buildingSelected];
+                    var res = [];
+                    var resPercentile = this.createArray(this.monthsLabels, arrPercentile);
+                    var resMean = this.createArray(this.monthsLabels, arrMean);
+                    var auxDict = {name: "Media", data: resMean};
+                    res.push(auxDict);
+                    auxDict = {name: "Percentil " + this.porcentaje + "%", data: resPercentile};
+                    res.push(auxDict);
+
+                    //res data de mediana
                     this.dataSelected = res;
                 }
             },
             createArray(vector1, vector2) { //asigna el valor a cada mes para poder mostrarlo en line-chart
                 //nuevo array bidimensional vacio de 12x2
                 var res = new Array(12);
-                for(var i = 0; i < res.length; i++){
+                for (var i = 0; i < res.length; i++) {
                     res[i] = new Array(2);
-                }
-
-                for(i = 0; i < 12; i++){
+                    //eje x
                     res[i][0] = vector1[i];
+                    //eje y
                     res[i][1] = vector2[i];
                 }
+
 
                 return res;
             },
