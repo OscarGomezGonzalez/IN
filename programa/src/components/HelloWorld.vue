@@ -85,7 +85,6 @@
                                 :curve="false"
                                 suffix="Kw"
                     ></line-chart>
-
                     <line-chart v-if="buildingSelected != null && $vuetify.theme.dark === true"
                                 :data="dataSelected"
                                 :round="2"
@@ -176,76 +175,7 @@
                 dataPercentiles: [],
                 fileSize: 0,
                 buildingSelected: null,
-                items: [
-                    {
-                        text: 'Edificio 1',
-                        value: 0
-                    },
-                    {
-                        text: 'Edificio 2',
-                        value: 1
-                    },
-                    {
-                        text: 'Edificio 3',
-                        value: 2
-                    },
-                    {
-                        text: 'Edificio 6',
-                        value: 3
-                    },
-                    {
-                        text: 'Edificio 7',
-                        value: 4
-                    },
-                    {
-                        text: 'Edificio 8',
-                        value: 5
-                    },
-                    {
-                        text: 'Edificio 10',
-                        value: 6
-                    },
-                    {
-                        text: 'Edificio 12',
-                        value: 7
-                    },
-                    {
-                        text: 'Edificio 14',
-                        value: 8
-                    },
-                    {
-                        text: 'Edificio 15',
-                        value: 9
-                    },
-                    {
-                        text: 'Edificio 17',
-                        value: 10
-                    },
-                    {
-                        text: 'Edificio 24',
-                        value: 11
-                    },
-                    {
-                        text: 'Edificio 25',
-                        value: 12
-                    },
-                    {
-                        text: 'Edificio 32',
-                        value: 13
-                    },
-                    {
-                        text: 'Edificio 37',
-                        value: 14
-                    },
-                    {
-                        text: 'Edificio 42',
-                        value: 15
-                    },
-                    {
-                        text: 'Edificio 44',
-                        value: 16
-                    },
-                ],
+                items: [],
                 monthsLabels: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
                 dataSelected: null,
                 average: null,
@@ -253,7 +183,7 @@
             }
 
         },
-        
+
         methods: {
             Analyze() {
                 //Parseo de datos a float
@@ -329,7 +259,8 @@
                 }
             },
 
-            createArray(vector1, vector2) { //asigna el valor a cada mes para poder mostrarlo en line-chart
+            createArray(vector1, vector2) {
+                //asigna el valor a cada mes para poder mostrarlo en line-chart
                 //nuevo array bidimensional vacio de 12x2
                 var res = new Array(12);
                 for (var i = 0; i < res.length; i++) {
@@ -353,7 +284,13 @@
                 this.filesData.push(data);
 
                 if (this.filesData.length == 1) {
+                    var auxDict;
                     this.filesHeaders = this.filesData[0].data[0].slice(1);
+                    //Creamos la variable items
+                    for (var i = 0; i < this.filesHeaders.length; i++) {
+                        auxDict = {text: this.filesHeaders[i], value: i};
+                        this.items.push(auxDict)
+                    }
                 } else {
                     this.filesData[this.filesData.length - 1].data[0].slice(1);
                 }
