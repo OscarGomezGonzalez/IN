@@ -243,6 +243,21 @@
                 this.dataQuartiles = edificioMesQuartiles;
                 this.dataMean = edificioMesMean;
 
+                var cantidadProducirPercentilTotal = new Array(12);
+                var cantidadProducirMeanTotal = new Array(12);
+                for (i = 0; i < 12; i++) {
+                    var sum = 0;
+                    var sumMean = 0;
+                    for (j = 0; j < this.dataPercentiles.length; j++) {
+                        sum += edificioMesPercentil[j][i];
+                        sumMean += edificioMesMean[j][i];
+                    }
+                    cantidadProducirPercentilTotal[i] = Math.round((sum * 1000)) / 1000;
+                    cantidadProducirMeanTotal[i] = Math.round((sumMean * 1000)) / 1000;
+                }
+                this.dataPercentiles.push(cantidadProducirPercentilTotal);
+                this.dataMean.push(cantidadProducirMeanTotal);
+
             },
 
             ReloadGraph() {
@@ -301,10 +316,10 @@
                         auxDict = {text: this.filesHeaders[i], value: i};
                         this.items.push(auxDict)
                     }
+                    this.items.push({text: "General", value: i});
                 } else {
                     this.filesData[this.filesData.length - 1].data[0].slice(1);
                 }
-
                 var orderedArray = this.filesData[this.filesData.length - 1].data.slice(1)
                     .sort((a, b) => a[0].split("/")[1] - b[0].split("/")[1]);
                 //Splice array based in months
