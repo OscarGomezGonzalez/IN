@@ -106,9 +106,9 @@
 
 <script>
     import Papa from 'papaparse'
-    import jsPDF from 'jspdf'
+    /**import jsPDF from 'jspdf'
     import html2canvas from 'html2canvas'
-
+*/
     var {jStat} = require('jstat');
 
     function SplitByMonth(Array) {
