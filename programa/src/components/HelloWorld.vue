@@ -257,10 +257,10 @@
                     auxDict = {name: "Percentil " + this.porcentaje + "%", data: resPercentile};
                     res.push(auxDict);
                     if (this.cantidadPaneles > 0) {
-                        var resPaneles10 = this.createArray(this.monthsLabels, this.panelTotalProducido10);
+                        var resPaneles10 = this.createArray(this.monthsLabels, this.panelTotalProducido10[this.buildingSelected]);
                         auxDict = {name: "Panel producido 10 años", data: resPaneles10};
                         res.push(auxDict);
-                        var resPaneles25 = this.createArray(this.monthsLabels, this.panelTotalProducido25);
+                        var resPaneles25 = this.createArray(this.monthsLabels, this.panelTotalProducido25[this.buildingSelected]);
                         auxDict = {name: "Panel producido 25 años", data: resPaneles25};
                         res.push(auxDict);
                     }
@@ -356,13 +356,20 @@
             calcularPaneles() {
                 this.cantidadPaneles = 0;
                 //ajustamos la variable de Kw a W
-                var cantidadAProducir = jStat.mean(this.dataPercentiles[this.buildingSelected]) * 1000;
-                this.cantidadPaneles = Math.ceil(cantidadAProducir / (this.UpoMedia * this.panelPerdida25 * this.panelW));
-                this.panelTotalProducido10 = new Array(12);
-                this.panelTotalProducido25 = new Array(12);
-                for (var j = 0; j < 12; j++) {
-                    this.panelTotalProducido10[j] = (this.cantidadPaneles * this.panelW * this.panelPerdida10 * this.UpoSol[j]) / 1000;
-                    this.panelTotalProducido25[j] = (this.cantidadPaneles * this.panelW * this.panelPerdida25 * this.UpoSol[j]) / 1000;
+                this.panelTotalProducido10 = new Array(this.dataPercentiles.length);
+                this.panelTotalProducido25 = new Array(this.dataPercentiles.length);
+                for (var i = 0; i < this.dataPercentiles.length; i++) {
+                    var cantidadAProducir = jStat.mean(this.dataPercentiles[i]) * 1000;
+                    this.cantidadPaneles = Math.ceil(cantidadAProducir / (this.UpoMedia * this.panelPerdida25 * this.panelW));
+                    var total10 = new Array(12);
+                    var total25 = new Array(12);
+                    for (var j = 0; j < 12; j++) {
+                        total10[j] = (this.cantidadPaneles * this.panelW * this.panelPerdida10 * this.UpoSol[j]) / 1000;
+                        total25[j] = (this.cantidadPaneles * this.panelW * this.panelPerdida25 * this.UpoSol[j]) / 1000;
+                    }
+                    this.panelTotalProducido10[i] = total10;
+                    this.panelTotalProducido25[i] = total25;
+
                 }
                 this.ReloadGraph();
             },
