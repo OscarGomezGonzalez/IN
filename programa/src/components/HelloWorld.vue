@@ -62,6 +62,7 @@
                                     :curve="false"
                                     :colors="['red','orange','lightgreen','green']"
                                     suffix="Kw"
+                                    :download="{background: '#fff'}"
                         ></line-chart>
                         <line-chart v-if="buildingSelected != null && $vuetify.theme.dark === true"
                                     :data="dataSelected"
@@ -69,6 +70,7 @@
                                     :curve="false"
                                     :colors="['red','orange','lightgreen','green']"
                                     suffix="Kw"
+                                    :download="{background: '#fff'}"
                         ></line-chart>
 
                         <v-divider></v-divider>
@@ -89,26 +91,31 @@
                     <v-text-field label="Ancho del panel(mm)" v-model="panelAnc" value="0.3">70</v-text-field>
                     <v-text-field label="Altura del panel(mm)" v-model="panelAlt" value="0.3">70</v-text-field>
                     <v-row>
-                        <v-col>
+                        <v-col/>
+                        <v-col cols="2">
                             <v-btn @click="calcularPaneles" rounded primary>Calcular paneles</v-btn>
                         </v-col>
                         <v-col/>
-                        <v-col>
-                            <v-btn v-if="dataQuartiles.length > 0" @click="createPDF" rounded primary>PDF</v-btn>
+                        <v-col/>
+                        <v-col cols="2">
+                            <v-btn v-if="cantidadPaneles > 0" @click="createPDF" rounded primary>RESULTADOS EN PDF</v-btn>
                         </v-col>
+                        <v-col/>
                     </v-row>
                 </v-form>
-                <span v-if="this.cantidadPaneles>0">{{this.cantidadPaneles}}</span>
+
             </v-col>
+            <v-col/>
         </v-row>
     </v-container>
 </template>
 
 <script>
     import Papa from 'papaparse'
-    /**import jsPDF from 'jspdf'
-    import html2canvas from 'html2canvas'
-*/
+
+    import jsPDF from 'jspdf'
+    import autoTable from 'jspdf-autotable'
+
     var {jStat} = require('jstat');
 
     function SplitByMonth(Array) {
@@ -295,8 +302,6 @@
                     //eje y
                     res[i][1] = vector2[i];
                 }
-
-
                 return res;
             },
 
@@ -346,26 +351,9 @@
                                 this.LoadedData(results);
                                 this.fileLoading = false
                             },
-                            /**
-                             step: (row) => {
-                                this.loadingBar(row);
-                            }
-                             */
                         });
 
                 }
-
-                //This will filter the first row and first column of the matrix
-                //Map will execute a function for every element of the array, and as it is a matrix we'll need to
-                //indent a map inside a map function
-                /**var newArray = this.filesData.map(function (val) {
-                    //this will remove the first row and order based on date month
-                    var orderedArray = val.data.slice(1).sort((a, b) => a[0].split("/")[1] - b[0].split("/")[1]);
-                    //Splice array based in months
-                    return SplitByMonth(orderedArray);
-                });
-                 this.filesData = newArray;
-                 */
             },
 
             calcularPaneles() {
@@ -388,29 +376,30 @@
                 }
                 this.ReloadGraph();
             },
-            /**
+
              createPDF() {
                 var fecha = new Date();
-                var pdfName = "presupuesto Solaire " + fecha.getDate() + "/" + (fecha.getMonth() + 1) + "/" + fecha.getFullYear();
-                var doc = new jsPDF();
-                const contentHtml = this.$refs.content.innerHTML;
-                doc.text(contentHtml, 10, 10);
-                // doc.text(this.dataStatistics.toString(), 10, 10);
+                var pdfName = "presupuesto Solaire " + fecha.getDay() + "/" + (fecha.getMonth() + 1) + "/" + fecha.getFullYear();
+
+                const doc = new jsPDF();
+                var canvas = document.getElementsByTagName('canvas')[0].toDataURL("image/png"); //base64
+                doc.addImage(canvas, 'PNG', 10, 50, 190, 50);
+
+                 autoTable(doc, { html: '#my-table' });
+
+                 autoTable(doc, {
+                     head: [['PANELES', 'VATIOS', 'LONGITUD', 'ANCHO', 'ALTURA', 'PRECIO']],
+                     body: [
+                         [this.cantidadPaneles, this.panelW + " W", this.panelLong + " mm", this.panelAnc + " mm", this.panelAlt + " mm", this.panelPrecio + " euros"],
+                         ['', '', '', '', 'TOTAL', (Math.round((this.panelPrecio*this.cantidadPaneles)*100)/100) + " euros"]
+                     ],
+                     headStyles: { fillColor: [55, 55, 55] },
+                     bodyStyles: { fillColor: [250, 250, 250]}
+                 });
+
                 doc.save(pdfName + '.pdf');
             },
 
-            // createPDFCSS() {
-            //     const doc = new jsPDF();
-            //     /** WITH CSS */
-            //     var canvasElement = document.createElement('canvas');
-            //     html2canvas(this.$refs.content, {
-            //         canvas: canvasElement
-            //     }).then(function (canvas) {
-            //         const img = canvas.toDataURL("image/jpeg", 0.8);
-            //         doc.addImage(img, 'JPEG', 20, 20);
-            //         doc.save("sample.pdf");
-            //     });
-            // },
         }
     }
 </script>
