@@ -38,63 +38,67 @@
                 <v-alert type="error" v-if="error!=null">{{error}}</v-alert>
                 <div v-if="filesData.length > 0">
                     <p>{{filesData.length}} dataset<span v-if="filesData.length>1">s</span> loaded</p>
-                    <!--
-                    <v-col cols="auto">
-                        <v-card raised>
-                            <v-card-title>File contents:</v-card-title>
-                            <v-card-text v-bind:key="fileData.data" v-for="fileData in filesData">
-                                <p v-if="fileData!=null">{{ fileData.data.length }}</p>
-                                <v-alert type="warning" v-else>Error al cargar archivo</v-alert>
-                            </v-card-text>
-                        </v-card>
-                    </v-col>
-                    -->
 
                     <v-text-field label="Porcentaje(%)" v-model="porcentaje">70</v-text-field>
 
-                    <v-btn @click="Analyze" rounded primary>Analizar</v-btn>
+                    <v-btn @click="Analyze" rounded primary>Mostrar datos</v-btn>
 
-                    &nbsp;&nbsp;&nbsp;&nbsp;
-
-                    <v-btn v-if="dataQuartiles.length > 0" @click="createPDF" rounded primary>PDF</v-btn>
-
-                    <p v-if="average !=null"></p>
+                    <v-select v-if="dataMean.length > 0" :items="items" label="Elige el edificio"
+                              v-model="buildingSelected"
+                              v-on:change="ReloadGraph"></v-select>
                 </div>
                 <br>
-                <v-form width="100%">
+            </v-col>
+
+        </v-row>
+        <div class="text-center" ref="content" id="pdf">
+            <div v-if="dataMean.length > 0">
+                <v-row>
+                    <v-col/>
+                    <v-col cols="10">
+                        <line-chart v-if="buildingSelected != null && $vuetify.theme.dark === false"
+                                    :data="dataSelected"
+                                    :round="2"
+                                    :curve="false"
+                                    :colors="['red','orange','lightgreen','green']"
+                                    suffix="Kw"
+                        ></line-chart>
+                        <line-chart v-if="buildingSelected != null && $vuetify.theme.dark === true"
+                                    :data="dataSelected"
+                                    :round="2"
+                                    :curve="false"
+                                    :colors="['red','orange','lightgreen','green']"
+                                    suffix="Kw"
+                        ></line-chart>
+
+                        <v-divider></v-divider>
+                    </v-col>
+                    <v-col/>
+                </v-row>
+                <v-row/>
+            </div>
+        </div>
+        <v-row v-if="this.buildingSelected != null">
+            <v-col/>
+            <v-col cols="10">
+                <v-form>
                     <h3>PANEL</h3>
                     <v-text-field label="Vatios" v-model="panelW" value="400"></v-text-field>
                     <v-text-field label="Precio por panel(euros)" v-model="panelPrecio" value="100"></v-text-field>
                     <v-text-field label="Longitud del panel(mm)" v-model="panelLong" value="0.3">70</v-text-field>
                     <v-text-field label="Ancho del panel(mm)" v-model="panelAnc" value="0.3">70</v-text-field>
                     <v-text-field label="Altura del panel(mm)" v-model="panelAlt" value="0.3">70</v-text-field>
-                    <v-btn @click="calcularPaneles" rounded primary>Calcular paneles</v-btn>
+                    <v-row>
+                        <v-col>
+                            <v-btn @click="calcularPaneles" rounded primary>Calcular paneles</v-btn>
+                        </v-col>
+                        <v-col/>
+                        <v-col>
+                            <v-btn v-if="dataQuartiles.length > 0" @click="createPDF" rounded primary>PDF</v-btn>
+                        </v-col>
+                    </v-row>
                 </v-form>
-            </v-col>
-
-        </v-row>
-        <v-row class="text-center">
-            <v-col cols="12" ref="content">
-                <div v-if="dataMean.length > 0">
-                    <v-select :items="items" label="Elige el edificio" v-model="buildingSelected"
-                              v-on:change="ReloadGraph"></v-select>
-
-                    <line-chart v-if="buildingSelected != null && $vuetify.theme.dark === false"
-                                :data="dataSelected"
-                                :round="2"
-                                :curve="false"
-                                suffix="Kw"
-                    ></line-chart>
-                    <line-chart v-if="buildingSelected != null && $vuetify.theme.dark === true"
-                                :data="dataSelected"
-                                :round="2"
-                                :curve="false"
-                                :colors="['grey']"
-                                suffix="Kw"
-                    ></line-chart>
-
-                    <v-divider></v-divider>
-                </div>
+                <span v-if="this.cantidadPaneles>0">{{this.cantidadPaneles}}</span>
             </v-col>
         </v-row>
     </v-container>
@@ -103,8 +107,7 @@
 <script>
     import Papa from 'papaparse'
     import jsPDF from 'jspdf'
-
-    // import html2canvas from 'hmtl2canvas';
+    import html2canvas from 'html2canvas'
 
     var {jStat} = require('jstat');
 
@@ -244,16 +247,23 @@
 
             ReloadGraph() {
                 if (this.buildingSelected != null) {
-                    var arrMean = this.dataQuartiles[this.buildingSelected];
-                    var arrPercentile = this.dataPercentiles[this.buildingSelected];
                     var res = [];
+                    var arrMean = this.dataMean[this.buildingSelected];
+                    var arrPercentile = this.dataPercentiles[this.buildingSelected];
                     var resPercentile = this.createArray(this.monthsLabels, arrPercentile);
                     var resMean = this.createArray(this.monthsLabels, arrMean);
                     var auxDict = {name: "Media", data: resMean};
                     res.push(auxDict);
                     auxDict = {name: "Percentil " + this.porcentaje + "%", data: resPercentile};
                     res.push(auxDict);
-
+                    if (this.cantidadPaneles > 0) {
+                        var resPaneles10 = this.createArray(this.monthsLabels, this.panelTotalProducido10);
+                        auxDict = {name: "Panel producido 10 años", data: resPaneles10};
+                        res.push(auxDict);
+                        var resPaneles25 = this.createArray(this.monthsLabels, this.panelTotalProducido25);
+                        auxDict = {name: "Panel producido 25 años", data: resPaneles25};
+                        res.push(auxDict);
+                    }
                     //res data de mediana
                     this.dataSelected = res;
                 }
@@ -345,17 +355,19 @@
 
             calcularPaneles() {
                 this.cantidadPaneles = 0;
-                var cantidadAProducir = 0;
-                this.cantidadPaneles = Math.ceil(cantidadAProducir / (this.panelW * this.UpoMedia * this.panelPerdida25));
+                //ajustamos la variable de Kw a W
+                var cantidadAProducir = jStat.mean(this.dataPercentiles[this.buildingSelected]) * 1000;
+                this.cantidadPaneles = Math.ceil(cantidadAProducir / (this.UpoMedia * this.panelPerdida25 * this.panelW));
+                this.panelTotalProducido10 = new Array(12);
+                this.panelTotalProducido25 = new Array(12);
+                for (var j = 0; j < 12; j++) {
+                    this.panelTotalProducido10[j] = (this.cantidadPaneles * this.panelW * this.panelPerdida10 * this.UpoSol[j]) / 1000;
+                    this.panelTotalProducido25[j] = (this.cantidadPaneles * this.panelW * this.panelPerdida25 * this.UpoSol[j]) / 1000;
+                }
+                this.ReloadGraph();
             },
-
-            produccionPaneles() {
-                this.panelTotalProducido10 = this.panelW * this.panelPerdida10 * this.UpoMedia;
-                this.panelTotalProducido25 = this.panelW * this.panelPerdida1025 * this.UpoMedia;
-
-            },
-
-            createPDF() {
+            /**
+             createPDF() {
                 var fecha = new Date();
                 var pdfName = "presupuesto Solaire " + fecha.getDate() + "/" + (fecha.getMonth() + 1) + "/" + fecha.getFullYear();
                 var doc = new jsPDF();
