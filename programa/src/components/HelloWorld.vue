@@ -98,7 +98,7 @@
                         <v-col/>
                         <v-col/>
                         <v-col cols="2">
-                            <v-btn v-if="cantidadPaneles > 0" @click="createPDF" rounded primary>RESULTADOS EN PDF</v-btn>
+                            <v-btn v-if="cantidadPaneles.length > 0" @click="createPDF" rounded primary>RESULTADOS EN PDF</v-btn>
                         </v-col>
                         <v-col/>
                     </v-row>
@@ -278,7 +278,7 @@
                     res.push(auxDict);
                     auxDict = {name: "Percentil " + this.porcentaje + "%", data: resPercentile};
                     res.push(auxDict);
-                    if (this.cantidadPaneles > 0) {
+                    if (this.cantidadPaneles.length > 0) {
                         var resPaneles10 = this.createArray(this.monthsLabels, this.panelTotalProducido10[this.buildingSelected]);
                         auxDict = {name: "Panel producido 10 años", data: resPaneles10};
                         res.push(auxDict);
@@ -361,14 +361,15 @@
                 //ajustamos la variable de Kw a W
                 this.panelTotalProducido10 = new Array(this.dataPercentiles.length);
                 this.panelTotalProducido25 = new Array(this.dataPercentiles.length);
+                this.cantidadPaneles = new Array(this.dataPercentiles.length);
                 for (var i = 0; i < this.dataPercentiles.length; i++) {
                     var cantidadAProducir = jStat.mean(this.dataPercentiles[i]) * 1000;
-                    this.cantidadPaneles = Math.ceil(cantidadAProducir / (this.UpoMedia * this.panelPerdida25 * this.panelW));
+                    this.cantidadPaneles[i] = Math.ceil(cantidadAProducir / (this.UpoMedia * this.panelPerdida25 * this.panelW));
                     var total10 = new Array(12);
                     var total25 = new Array(12);
                     for (var j = 0; j < 12; j++) {
-                        total10[j] = (this.cantidadPaneles * this.panelW * this.panelPerdida10 * this.UpoSol[j]) / 1000;
-                        total25[j] = (this.cantidadPaneles * this.panelW * this.panelPerdida25 * this.UpoSol[j]) / 1000;
+                        total10[j] = (this.cantidadPaneles[i] * this.panelW * this.panelPerdida10 * this.UpoSol[j]) / 1000;
+                        total25[j] = (this.cantidadPaneles[i] * this.panelW * this.panelPerdida25 * this.UpoSol[j]) / 1000;
                     }
                     this.panelTotalProducido10[i] = total10;
                     this.panelTotalProducido25[i] = total25;
@@ -390,8 +391,8 @@
                  autoTable(doc, {
                      head: [['PANELES', 'VATIOS', 'LONGITUD', 'ANCHO', 'ALTURA', 'PRECIO']],
                      body: [
-                         [this.cantidadPaneles, this.panelW + " W", this.panelLong + " mm", this.panelAnc + " mm", this.panelAlt + " mm", this.panelPrecio + " euros"],
-                         ['', '', '', '', 'TOTAL', (Math.round((this.panelPrecio*this.cantidadPaneles)*100)/100) + " euros"]
+                         [this.cantidadPaneles[this.buildingSelected], this.panelW + " W", this.panelLong + " mm", this.panelAnc + " mm", this.panelAlt + " mm", this.panelPrecio + " euros"],
+                         ['', '', '', '', 'TOTAL', (Math.round((this.panelPrecio*this.cantidadPaneles[this.buildingSelected])*100)/100) + " euros"]
                      ],
                      headStyles: { fillColor: [55, 55, 55] },
                      bodyStyles: { fillColor: [250, 250, 250]}
